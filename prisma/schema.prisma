@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum USER_ROLE {
+  ADMIN
+  NORMAL_USER
+}
+
+model User {
+  id                String          @id @default(uuid()) @db.Uuid
+  name              String
+  email             String          @unique
+  password          String
+  userProfileUrl    String?
+  githubAccessToken String?
+  role              USER_ROLE       @default(NORMAL_USER)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  UserBoardJoin     UserBoardJoin[]
+  authoredTasks     Task[]          @relation(name: "AuthoredTasks")
+  assignedTasks     Task[]          @relation(name: "AssignedTasks")
+
+  @@unique([email, password])
+}
+
+model Board {
+  id            String          @id @default(uuid()) @db.Uuid
+  name          String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  UserBoardJoin UserBoardJoin[]
+  panels        Panel[]
+}
+
+model UserBoardJoin {
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @db.Uuid
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId   String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isOwner   Boolean  @default(false)
+
+  @@id([userId, boardId])
+}
+
+model Panel {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId   String   @db.Uuid
+  tasks     Task[]
+  sortOrder Int      @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id           String        @id @default(uuid()) @db.Uuid
+  title        String
+  description  String
+  priority     TASK_PRIORITY @default(LOW)
+  panel        Panel         @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  panelId      String        @db.Uuid
+  author       User          @relation(name: "AuthoredTasks", fields: [authorId], references: [id])
+  authorId     String        @db.Uuid
+  assignedTo   User          @relation(name: "AssignedTasks", fields: [assignedToId], references: [id])
+  assignedToId String        @db.Uuid
+  sortOrder    Int           @default(autoincrement())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+enum TASK_PRIORITY {
+  HIGH
+  NORMAL
+  LOW
+}

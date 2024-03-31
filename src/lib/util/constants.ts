@@ -1,0 +1,6 @@
+export const EMPTY_STRING = ''
+export const DEFAULT_EMAIL = 'noemail@taskflow.com'
+export const DEFAULT_NAME = 'NoName'
+export const DEFAULT_UUID = 'FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF'
+export const DEFAULT_STRING = 'DEFAULT_STRING'
+export const DEFAULT_PASSWORD = '123456'
